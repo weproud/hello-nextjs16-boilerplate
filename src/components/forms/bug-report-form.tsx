@@ -1,10 +1,13 @@
+/* eslint-disable react/no-children-prop */
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { useTransition } from "react";
 import * as React from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { submitBugReport } from "@/app/actions/bug-report";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,16 +31,19 @@ interface FieldProps extends React.HTMLAttributes<HTMLDivElement> {
   "data-invalid"?: boolean;
 }
 
-const Field = React.forwardRef<HTMLDivElement, FieldProps>(({ className, ...props }, ref) => {
-  return <div ref={ref} className={cn("space-y-2", className)} {...props} />;
-});
-Field.displayName = "Field";
-
-const FieldGroup = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+const Field = React.forwardRef<HTMLDivElement, FieldProps>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} className={cn("space-y-6", className)} {...props} />;
+    return <div ref={ref} className={cn("space-y-2", className)} {...props} />;
   }
 );
+Field.displayName = "Field";
+
+const FieldGroup = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  return <div ref={ref} className={cn("space-y-6", className)} {...props} />;
+});
 FieldGroup.displayName = "FieldGroup";
 
 const FieldLabel = React.forwardRef<
@@ -48,7 +54,7 @@ const FieldLabel = React.forwardRef<
     <Label
       ref={ref}
       className={cn(
-        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        "font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className
       )}
       {...props}
@@ -61,12 +67,22 @@ const FieldDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
-  return <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />;
+  return (
+    <p
+      ref={ref}
+      className={cn("text-muted-foreground text-sm", className)}
+      {...props}
+    />
+  );
 });
 FieldDescription.displayName = "FieldDescription";
 
 interface FieldErrorProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  errors?: any[];
+  errors?: (
+    | string
+    | { message?: string; toString?: () => string }
+    | undefined
+  )[];
 }
 
 const FieldError = React.forwardRef<HTMLParagraphElement, FieldErrorProps>(
@@ -74,13 +90,24 @@ const FieldError = React.forwardRef<HTMLParagraphElement, FieldErrorProps>(
     if (!errors || errors.length === 0) return null;
 
     // TanStack Form 오류 메시지 추출
-    const errorMessage =
-      typeof errors[0] === "string"
-        ? errors[0]
-        : errors[0]?.message || errors[0]?.toString() || "유효하지 않은 입력입니다.";
+    const firstError = errors[0];
+    let errorMessage = "유효하지 않은 입력입니다.";
+
+    if (typeof firstError === "string") {
+      errorMessage = firstError;
+    } else if (firstError && typeof firstError === "object") {
+      errorMessage =
+        (firstError as any).message ||
+        (firstError as any).toString?.() ||
+        "유효하지 않은 입력입니다.";
+    }
 
     return (
-      <p ref={ref} className={cn("text-sm font-medium text-destructive", className)} {...props}>
+      <p
+        ref={ref}
+        className={cn("font-medium text-destructive text-sm", className)}
+        {...props}
+      >
         {errorMessage}
       </p>
     );
@@ -89,6 +116,8 @@ const FieldError = React.forwardRef<HTMLParagraphElement, FieldErrorProps>(
 FieldError.displayName = "FieldError";
 
 export function BugReportForm() {
+  const [isPending, startTransition] = useTransition();
+
   const form = useForm({
     defaultValues: {
       title: "",
@@ -98,17 +127,28 @@ export function BugReportForm() {
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      // 폼 제출 처리
-      console.log("제출된 데이터:", value);
-      toast.success("버그 리포트가 성공적으로 제출되었습니다!");
+      // Server Action으로 폼 제출
+      startTransition(async () => {
+        const result = await submitBugReport(value);
+
+        if (result.success) {
+          toast.success(result.message);
+          // 폼 초기화
+          form.reset();
+        } else {
+          toast.error(result.error || result.message);
+        }
+      });
     },
   });
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-card rounded-lg border">
+    <div className="mx-auto max-w-md rounded-lg border bg-card p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">버그 리포트</h2>
-        <p className="text-muted-foreground">발견한 버그를 신고하여 개선에 도움을 주세요.</p>
+        <h2 className="font-bold text-2xl">버그 리포트</h2>
+        <p className="text-muted-foreground">
+          발견한 버그를 신고하여 개선에 도움을 주세요.
+        </p>
       </div>
 
       <form
@@ -122,10 +162,13 @@ export function BugReportForm() {
           <form.Field
             name="title"
             validators={{
-              onBlur: z.string().min(10, "버그 제목은 최소 10자 이상이어야 합니다."),
+              onBlur: z
+                .string()
+                .min(10, "버그 제목은 최소 10자 이상이어야 합니다."),
             }}
             children={(field) => {
-              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>버그 제목</FieldLabel>
@@ -138,9 +181,14 @@ export function BugReportForm() {
                     aria-invalid={isInvalid}
                     placeholder="모바일에서 로그인 버튼이 작동하지 않음"
                     autoComplete="off"
-                    className={cn(isInvalid && "border-destructive focus-visible:ring-destructive")}
+                    className={cn(
+                      isInvalid &&
+                        "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
-                  <FieldDescription>버그에 대한 간결한 제목을 입력해주세요.</FieldDescription>
+                  <FieldDescription>
+                    버그에 대한 간결한 제목을 입력해주세요.
+                  </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
@@ -153,7 +201,8 @@ export function BugReportForm() {
               onBlur: z.string().min(10, "설명은 최소 10자 이상이어야 합니다."),
             }}
             children={(field) => {
-              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>설명</FieldLabel>
@@ -167,10 +216,13 @@ export function BugReportForm() {
                     placeholder="버그가 발생한 상황과 예상되는 동작을 자세히 설명해주세요."
                     className={cn(
                       "min-h-[100px] resize-none",
-                      isInvalid && "border-destructive focus-visible:ring-destructive"
+                      isInvalid &&
+                        "border-destructive focus-visible:ring-destructive"
                     )}
                   />
-                  <FieldDescription>버그 재현 방법과 예상 결과를 포함해주세요.</FieldDescription>
+                  <FieldDescription>
+                    버그 재현 방법과 예상 결과를 포함해주세요.
+                  </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
@@ -178,8 +230,8 @@ export function BugReportForm() {
           />
         </FieldGroup>
 
-        <Button type="submit" className="w-full">
-          제출
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "제출 중..." : "제출"}
         </Button>
       </form>
     </div>

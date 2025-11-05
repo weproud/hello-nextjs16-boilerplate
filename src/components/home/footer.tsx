@@ -6,10 +6,10 @@ import { Heart } from "lucide-react";
  */
 export function HomeFooter() {
   return (
-    <div className="w-full mt-16 text-center">
+    <div className="mt-16 w-full text-center">
       <p className="text-foreground/50 text-sm">
         Built with{" "}
-        <Heart className="inline-block w-4 h-4 text-red-500 align-text-bottom" aria-label="love" />{" "}
+        <Heart className="inline-block h-4 w-4 align-text-bottom text-red-500" aria-label="love" />{" "}
         using Next.js 16 and modern web technologies
       </p>
     </div>

@@ -9,40 +9,40 @@ import { Card, CardContent } from "@/components/ui/card";
  */
 export function FeaturesSection() {
   return (
-    <div className="max-w-4xl w-full mb-12">
-      <Card className="w-full bg-background/80 backdrop-blur-sm border-foreground/10 shadow-xl">
+    <div className="mb-12 w-full max-w-4xl">
+      <Card className="w-full border-foreground/10 bg-background/80 shadow-xl backdrop-blur-sm">
         <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <h2 className="font-bold text-3xl text-foreground mb-2">
+          <div className="mb-8 text-center">
+            <h2 className="mb-2 font-bold text-3xl text-foreground">
               <span className="inline-flex items-center gap-2">
-                <Wrench className="w-7 h-7" aria-hidden="true" />
+                <Wrench className="h-7 w-7" aria-hidden="true" />
                 <span>기능</span>
               </span>
             </h2>
             <p className="text-foreground/70">각 기능 페이지로 이동하여 실제 동작을 확인해보세요</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* 로그인 기능 카드 */}
-            <div className="group relative p-6 rounded-2xl bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-12 h-12 bg-foreground text-background rounded-xl flex items-center justify-center text-xl font-bold shadow-lg">
-                  <LogIn className="w-6 h-6" aria-hidden="true" />
+            <div className="group hover:-translate-y-1 relative rounded-2xl border border-foreground/10 bg-foreground/5 p-6 transition-all duration-300 hover:bg-foreground/10 hover:shadow-lg">
+              <div className="mb-3 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-foreground font-bold text-background text-xl shadow-lg">
+                  <LogIn className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-foreground">
+                  <h3 className="font-bold text-foreground text-lg">
                     로그인 (Google OAuth + Auth.js v5)
                   </h3>
-                  <p className="text-sm text-foreground/60">소셜 로그인 및 세션 표시 데모</p>
+                  <p className="text-foreground/60 text-sm">소셜 로그인 및 세션 표시 데모</p>
                 </div>
               </div>
-              <p className="text-sm text-foreground/60 leading-relaxed mb-4">
+              <p className="mb-4 text-foreground/60 text-sm leading-relaxed">
                 Google 계정으로 로그인하고 사용자 정보를 확인하는 흐름을 체험해보세요.
               </p>
               <div className="flex justify-end">
                 <Link
                   href="/features/login"
-                  className="text-sm font-medium text-foreground hover:text-foreground/80 underline underline-offset-4"
+                  className="font-medium text-foreground text-sm underline underline-offset-4 hover:text-foreground/80"
                 >
                   자세히 보기 →
                 </Link>
@@ -50,26 +50,26 @@ export function FeaturesSection() {
             </div>
 
             {/* 폼 + Zod 기능 카드 */}
-            <div className="group relative p-6 rounded-2xl bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-12 h-12 bg-foreground text-background rounded-xl flex items-center justify-center text-xl font-bold shadow-lg">
-                  <FileText className="w-6 h-6" aria-hidden="true" />
+            <div className="group hover:-translate-y-1 relative rounded-2xl border border-foreground/10 bg-foreground/5 p-6 transition-all duration-300 hover:bg-foreground/10 hover:shadow-lg">
+              <div className="mb-3 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-foreground font-bold text-background text-xl shadow-lg">
+                  <FileText className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-foreground">
+                  <h3 className="font-bold text-foreground text-lg">
                     폼 검증 (TanStack Form + Zod)
                   </h3>
-                  <p className="text-sm text-foreground/60">스키마 기반 폼 검증 데모</p>
+                  <p className="text-foreground/60 text-sm">스키마 기반 폼 검증 데모</p>
                 </div>
               </div>
-              <p className="text-sm text-foreground/60 leading-relaxed mb-4">
+              <p className="mb-4 text-foreground/60 text-sm leading-relaxed">
                 타입 안전한 Zod 스키마로 폼 검증을 수행하고 사용자 경험을 향상하는 패턴을
                 확인하세요.
               </p>
               <div className="flex justify-end">
                 <Link
                   href="/features/form"
-                  className="text-sm font-medium text-foreground hover:text-foreground/80 underline underline-offset-4"
+                  className="font-medium text-foreground text-sm underline underline-offset-4 hover:text-foreground/80"
                 >
                   자세히 보기 →
                 </Link>

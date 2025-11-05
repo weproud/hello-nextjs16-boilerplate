@@ -43,7 +43,7 @@ export function UserAvatar({
       </Avatar>
       <div className="flex flex-col text-start">
         <span className="font-black text-3xl leading-none">{name ?? "Unknown"}</span>
-        <span className="font-medium text-sm leading-none text-muted-foreground">
+        <span className="font-medium text-muted-foreground text-sm leading-none">
           {displayName ?? "Unknown"}
         </span>
       </div>
